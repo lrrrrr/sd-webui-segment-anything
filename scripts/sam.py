@@ -235,8 +235,9 @@ def sam_predict(sam_model_name, input_image, positive_points, negative_points,
             multimask_output=True)
         masks = masks[:, None, ...]
     garbage_collect(sam)
-    return create_mask_output(image_np, masks, boxes_filt), sam_predict_status + sam_predict_result + (f" However, GroundingDINO installment has failed. Your process automatically fall back to local groundingdino. Check your terminal for more detail and {dino_install_issue_text}." if (dino_enabled and not install_success) else "")
-
+    # Convert bounding boxes to a suitable format if they exist
+    bounding_boxes = boxes_filt.tolist() if boxes_filt is not None else None
+    return create_mask_output(image_np, masks, boxes_filt), bounding_boxes, sam_predict_status + sam_predict_result + (f" However, GroundingDINO installment has failed. Your process automatically fall back to local groundingdino. Check your terminal for more detail and {dino_install_issue_text}." if (dino_enabled and not install_success) else "")
 
 def dino_predict(input_image, dino_model_name, text_prompt, box_threshold):
     if input_image is None:

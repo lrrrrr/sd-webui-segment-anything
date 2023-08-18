@@ -63,7 +63,7 @@ def sam_api(_: gr.Blocks, app: FastAPI):
     async def api_sam_predict(payload: SamPredictRequest = Body(...)) -> Any:
         print(f"SAM API /sam/sam-predict received request")
         payload.input_image = decode_to_pil(payload.input_image).convert('RGBA')
-        sam_output_mask_gallery, sam_message = sam_predict(
+        sam_output_mask_gallery, bounding_boxes, sam_message = sam_predict(
             payload.sam_model_name,
             payload.input_image,
             payload.sam_positive_points,
@@ -82,6 +82,7 @@ def sam_api(_: gr.Blocks, app: FastAPI):
             result["blended_images"] = list(map(encode_to_base64, sam_output_mask_gallery[:3]))
             result["masks"] = list(map(encode_to_base64, sam_output_mask_gallery[3:6]))
             result["masked_images"] = list(map(encode_to_base64, sam_output_mask_gallery[6:]))
+            result["bounding_boxes"] = bounding_boxes # Include bounding boxes in the response
         return result
 
     class DINOPredictRequest(BaseModel):
